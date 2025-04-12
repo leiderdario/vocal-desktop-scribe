@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,11 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				assistant: {
+					blue: '#4F46E5',
+					purple: '#8B5CF6',
+					dark: '#1E1E2E'
 				}
 			},
 			borderRadius: {
@@ -84,11 +90,23 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-ring': {
+					'0%': { transform: 'scale(0.8)', opacity: '0.8' },
+					'70%': { transform: 'scale(1.5)', opacity: '0' },
+					'100%': { transform: 'scale(0.8)', opacity: '0' }
+				},
+				'wave': {
+					'0%': { transform: 'scaleY(0.2)' },
+					'50%': { transform: 'scaleY(1)' },
+					'100%': { transform: 'scaleY(0.2)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-ring': 'pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite',
+				'wave': 'wave 0.7s ease infinite'
 			}
 		}
 	},
