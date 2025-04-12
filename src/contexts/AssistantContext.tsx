@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 
@@ -27,7 +28,9 @@ export const AssistantProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Initialize speech recognition
   useEffect(() => {
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognitionAPI = window.SpeechRecognition || 
+      // Use the appropriate constructor based on browser support
+      // The type casting to 'any' is needed to handle browser differences
+      const SpeechRecognitionAPI = (window as any).SpeechRecognition || 
                                   (window as any).webkitSpeechRecognition;
       
       recognitionRef.current = new SpeechRecognitionAPI();
