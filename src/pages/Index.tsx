@@ -1,9 +1,14 @@
 
 import React from 'react';
 import AssistantDemo from '@/components/assistant/AssistantDemo';
+import { AssistantProvider } from '@/contexts/AssistantContext';
 
 const Index = () => {
-  return <AssistantDemo />;
+  return (
+    <AssistantProvider>
+      <AssistantDemo />
+    </AssistantProvider>
+  );
 };
 
 export default Index;

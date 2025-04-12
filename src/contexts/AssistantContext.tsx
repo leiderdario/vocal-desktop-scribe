@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 
@@ -28,8 +27,10 @@ export const AssistantProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Initialize speech recognition
   useEffect(() => {
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
+      const SpeechRecognitionAPI = window.SpeechRecognition || 
+                                  (window as any).webkitSpeechRecognition;
+      
+      recognitionRef.current = new SpeechRecognitionAPI();
       
       if (recognitionRef.current) {
         recognitionRef.current.continuous = false;

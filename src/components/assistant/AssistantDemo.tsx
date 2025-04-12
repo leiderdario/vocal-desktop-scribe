@@ -10,6 +10,8 @@ const AssistantDemo = () => {
 
   // Monitor response to detect app actions
   useEffect(() => {
+    if (!response) return; // Add this check to avoid errors with undefined response
+    
     if (response.includes('Abriendo Microsoft Excel')) {
       setOpenApp('excel');
     } else if (response.includes('Abriendo Microsoft Word')) {
