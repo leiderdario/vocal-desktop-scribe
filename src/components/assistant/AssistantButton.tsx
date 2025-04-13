@@ -5,7 +5,19 @@ import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const AssistantButton = () => {
-  const { isListening, isProcessing, toggleListening } = useAssistant();
+  const { isListening, isProcessing, toggleListening, microphoneAllowed, requestMicrophoneAccess } = useAssistant();
+
+  const handleButtonClick = () => {
+    if (!microphoneAllowed) {
+      requestMicrophoneAccess().then((allowed) => {
+        if (allowed) {
+          toggleListening();
+        }
+      });
+    } else {
+      toggleListening();
+    }
+  };
 
   return (
     <div className="relative flex justify-center items-center">
@@ -13,7 +25,7 @@ const AssistantButton = () => {
         <div className="absolute w-24 h-24 rounded-full animate-pulse-ring bg-gradient-to-r from-assistant-blue to-assistant-purple opacity-30"></div>
       )}
       <button
-        onClick={toggleListening}
+        onClick={handleButtonClick}
         disabled={isProcessing}
         className={cn(
           "w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all duration-300",
@@ -30,6 +42,11 @@ const AssistantButton = () => {
           <MicOff className="h-8 w-8" />
         )}
       </button>
+      {!microphoneAllowed && (
+        <div className="absolute -bottom-10 text-xs text-center text-red-600 w-48">
+          Permiso de micrófono requerido
+        </div>
+      )}
     </div>
   );
 };

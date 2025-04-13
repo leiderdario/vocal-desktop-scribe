@@ -10,6 +10,8 @@ interface AssistantContextProps {
   response: string;
   toggleListening: () => void;
   executeCommand: (command: string) => Promise<void>;
+  microphoneAllowed: boolean;
+  requestMicrophoneAccess: () => Promise<boolean>;
 }
 
 // Create the context
@@ -21,6 +23,7 @@ export const AssistantProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isProcessing, setIsProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [response, setResponse] = useState('');
+  const [microphoneAllowed, setMicrophoneAllowed] = useState(false);
   
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const { toast } = useToast();
@@ -63,11 +66,21 @@ export const AssistantProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         recognitionRef.current.onerror = (event) => {
           console.error('Speech recognition error', event.error);
           setIsListening(false);
-          toast({
-            title: "Error de reconocimiento",
-            description: `Hubo un problema al escuchar: ${event.error}`,
-            variant: "destructive"
-          });
+          
+          if (event.error === 'not-allowed') {
+            setMicrophoneAllowed(false);
+            toast({
+              title: "Acceso al micrófono denegado",
+              description: "Para utilizar el asistente por voz, debes permitir el acceso al micrófono.",
+              variant: "destructive"
+            });
+          } else {
+            toast({
+              title: "Error de reconocimiento",
+              description: `Hubo un problema al escuchar: ${event.error}`,
+              variant: "destructive"
+            });
+          }
         };
       }
     } else {
@@ -78,12 +91,50 @@ export const AssistantProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       });
     }
 
+    // Check if microphone is already allowed
+    checkMicrophonePermission();
+
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
     };
   }, [toast]);
+  
+  // Function to check microphone permission
+  const checkMicrophonePermission = async () => {
+    try {
+      const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+      setMicrophoneAllowed(permissionStatus.state === 'granted');
+      
+      permissionStatus.onchange = () => {
+        setMicrophoneAllowed(permissionStatus.state === 'granted');
+      };
+    } catch (error) {
+      console.error('Failed to check microphone permission:', error);
+    }
+  };
+  
+  // Function to request microphone access
+  const requestMicrophoneAccess = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      setMicrophoneAllowed(true);
+      toast({
+        title: "Micrófono activado",
+        description: "El asistente por voz ya puede escucharte.",
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to get microphone access:', error);
+      toast({
+        title: "Acceso al micrófono denegado",
+        description: "Por favor, permite el acceso al micrófono para usar el asistente por voz.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
 
   // Handle recognized speech
   const handleRecognizedSpeech = async (text: string) => {
@@ -100,7 +151,15 @@ export const AssistantProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (isListening && recognitionRef.current) {
       recognitionRef.current.stop();
     } else if (recognitionRef.current) {
-      recognitionRef.current.start();
+      if (!microphoneAllowed) {
+        requestMicrophoneAccess().then(allowed => {
+          if (allowed && recognitionRef.current) {
+            recognitionRef.current.start();
+          }
+        });
+      } else {
+        recognitionRef.current.start();
+      }
     }
   };
 
@@ -204,7 +263,9 @@ export const AssistantProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     transcript,
     response,
     toggleListening,
-    executeCommand
+    executeCommand,
+    microphoneAllowed,
+    requestMicrophoneAccess
   };
 
   return (
